@@ -1,6 +1,8 @@
 import clsx from "clsx";
+import Timer from "@/app/Timer";
+import { DateTime, Duration } from "luxon";
 
-function Subtask({ title, finished = false }) {
+function Subtask({ title, finished = false, subtasks = [] }) {
   return (
     <div
       className={clsx(
@@ -8,7 +10,18 @@ function Subtask({ title, finished = false }) {
         finished ? "text-slate-400 line-through" : "text-slate-900"
       )}
     >
-      {title}
+      <label>
+        <input type="checkbox" checked={finished} /> {title}
+      </label>
+      <div class="ml-4">
+        {subtasks.map((subtask, index) => (
+          <Subtask
+            key={index}
+            title={subtask.title}
+            finished={subtask.finished}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -24,23 +37,25 @@ function Task({ title, status, createdAt, finishedAt, subtasks = [] }) {
       )}
       <div
         className={clsx(
-          "p-1",
+          "p-1 font-bold",
           status === "finished"
             ? "text-slate-400 line-through"
             : "text-slate-900",
-          status === "most-important" ? "text-3xl font-bold" : "text-base"
+          status === "most-important" ? "text-3xl" : "text-lg"
         )}
       >
         {title}
       </div>
-
-      {subtasks.map((subtask, index) => (
-        <Subtask
-          key={index}
-          title={subtask.title}
-          finished={subtask.finished}
-        />
-      ))}
+      <div class="">
+        {subtasks.map((subtask, index) => (
+          <Subtask
+            key={index}
+            title={subtask.title}
+            finished={subtask.finished}
+            subtasks={subtask.subtasks}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -60,7 +75,7 @@ export default function Home() {
   const tasks = [
     {
       id: 1,
-      status: "most-important",
+      status: "backlog",
       title: "Allow adding a new task by typing it into a text box.",
       subtasks: [
         { finished: true, title: "Create a new component for task input" },
@@ -104,11 +119,54 @@ export default function Home() {
       title:
         "Allow specifying the next most important task, and put it at the top of the screen.",
     },
+    {
+      id: 9,
+      status: "backlog",
+      title: "Add a dark mode to the app to prevent blindness during the night",
+    },
+    {
+      id: 10,
+      status: "most-important",
+      title: "Add a countdown timer until the next work period is finished",
+      subtasks: [
+        { title: "Create the timer display", finished: true },
+        {
+          finished: true,
+          title:
+            "Using a hardcoded end time, use setInterval to create a countdown effect.",
+        },
+        {
+          title: "Add pause, unpause, and reset",
+          subtasks: [
+            { title: "Add pause and unpause" },
+            { title: "Add reset button" },
+          ],
+        },
+      ],
+    },
+    {
+      id: 13,
+      status: "backlog",
+      title:
+        "Allow toggling the showing of subtasks so that they can be hidden if they aren't being worked on right now, and so that they don't have to be visible when browsing tasks, unless you want them to be.",
+    },
+    {
+      id: 11,
+      status: "backlog",
+      title:
+        "Make Github issues the backing store for tasks and convert this into a Github Issue Pomodoro Timer",
+    },
+    {
+      id: 12,
+      status: "backlog",
+      title: "Use Airtable for the time tracking?",
+    },
   ];
 
   return (
     <main>
-      <h3 className="text-xl mb-4">Most Important Task</h3>
+      <Timer />
+
       {tasks
         .filter((task) => task.status === "most-important")
         .map((task) => (
